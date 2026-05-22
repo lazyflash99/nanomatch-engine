@@ -1,0 +1,30 @@
+# Build and Output
+build/
+bin/
+obj/
+nanomatch_engine
+nanomatch_bench
+
+# Performance and Profiling Logs
+perf.data
+perf.data.old
+out.perf
+out.folded
+gmon.out
+
+# Data Files (Generate locally)
+*.bin
+*.csv
+*.pcap
+test_data*
+
+# External Repositories
+FlameGraph/
+benchmark/
+
+# IDE and System Files
+.vscode/
+.idea/
+.DS_Store
+cmake-build-*/
+*.user
