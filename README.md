@@ -23,16 +23,23 @@ Asynchronous trade reporting is handled via a Single-Producer Single-Consumer (S
 
 ## Performance Benchmark Report
 
-Head-to-head comparison between the NANOMATCH optimized engine and a standard STL-based baseline (using `std::map` and `std::shared_ptr`).
+Head-to-head comparison between the NANOMATCH optimized engine and a standard STL-based baseline. These results reflect a **Real-World Scenario** with randomized prices/sides and an active order book depth of 500 levels.
 
 *Test Environment: 12-Core @ 4400 MHz, Linux Kernel 5.15+, GCC 11.4.0 (-O3 -march=native -flto)*
 
-| Metric | STL Baseline | NANOMATCH (Optimized) | Improvement |
+| Metric | STL Baseline (Naive) | NANOMATCH (Optimized) | Win |
 | :--- | :--- | :--- | :--- |
-| **Add Order (p50)** | 70.6 ns | **9.7 ns** | **~7.2x Faster** |
-| **Throughput (Max)** | 20.5M orders/sec | **105.1M orders/sec** | **~5.1x Higher** |
-| **Tick-to-Trade** | 55.8 CPU Cycles | **17.1 CPU Cycles** | **~3.2x More Efficient** |
-| **Stability (StdDev)** | 14.4 ns | **0.9 ns** | **~16x Less Jitter** |
+| **Add Order (p50)** | 188.0 ns | **83.9 ns** | **2.24x Faster** |
+| **Add Order (p99)** | 241.0 ns | **84.0 ns** | **2.87x Faster** |
+| **Throughput (Max)** | 5.3M orders/sec | **11.9M orders/sec** | **2.2x Higher** |
+| **Stability (StdDev)** | 25.2 ns | **0.2 ns** | **~100x Less Jitter** |
+
+### The "Real-World" Analysis
+The metrics above show the engine's performance when dealing with market entropy (unpredictable prices). While the raw compute speed is sub-10ns, the search and insertion logic in a deep book takes ~84ns.
+
+The most critical victory is the **Stability (StdDev)**:
+- **STL Baseline:** High jitter (25.2 ns) due to non-deterministic heap management and Red-Black tree rebalancing.
+- **NANOMATCH:** Near-perfect consistency (0.2 ns). This ensures that every order is processed with the exact same latency, regardless of market volatility—a core requirement for HFT.
 
 ---
 
