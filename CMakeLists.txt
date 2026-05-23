@@ -22,7 +22,8 @@ add_executable(nanomatch_engine src/main.cpp)
 
 # Unit Testing
 add_executable(nanomatch_test tests/unit_tests.cpp)
-target_link_libraries(nanomatch_test benchmark::benchmark) # Just for DoNotOptimize
+target_link_libraries(nanomatch_test benchmark::benchmark)
+target_compile_options(nanomatch_test PRIVATE -UNDEBUG)
 
 # Benchmarking
 # Note: Requires google-benchmark installed (e.g., sudo apt install libbenchmark-dev)
