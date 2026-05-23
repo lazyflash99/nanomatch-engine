@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
         const char* ptr = file.data();
         const char* end = ptr + file.size();
 
-        // 100% Consistent Capacities
         auto order_pool = std::make_unique<ObjectPool<Order, 200000>>();
         auto report_queue = std::make_unique<SPSCQueue<TradeReport, 1024>>();
         auto ob = std::make_unique<OrderBook<1024, 200000>>(1, order_pool.get(), report_queue.get());
@@ -59,10 +58,13 @@ int main(int argc, char** argv) {
                 if (CSVParser::parse_row(line, row)) {
                     Order* order = order_pool->acquire();
                     if (order) {
-                        *order = {.order_id = row.order_id, .price = row.price, .quantity = row.quantity, 
-                                  .instrument_id = 1, .side = (row.side == 'B' ? Side::BUY : Side::SELL), 
-                                  .type = (row.type == 'M' ? OrderType::MARKET : OrderType::LIMIT),
-                                  .next = nullptr, .prev = nullptr, .level = nullptr, .padding = {0}};
+                        *order = {};
+                        order->order_id = row.order_id;
+                        order->price = row.price;
+                        order->quantity = row.quantity;
+                        order->instrument_id = 1;
+                        order->side = (row.side == 'B') ? Side::BUY : Side::SELL;
+                        order->type = (row.type == 'M') ? OrderType::MARKET : OrderType::LIMIT;
                         ob->add_order(order);
                     }
                     processed++;
@@ -101,14 +103,13 @@ int main(int argc, char** argv) {
                         } else {
                             Order* order = order_pool->acquire();
                             if (order) {
-                                // Zero-initialize entire struct to satisfy compiler and prevent garbage
                                 *order = {};
                                 ITCHParser::parse_and_fill(msg_ptr, *order);
                                 order->type = (msg_type == 'M') ? OrderType::MARKET : OrderType::LIMIT;
                                 ob->add_order(order);
                             }
                         }
-                        msg_ptr += 25; // Advance past payload
+                        msg_ptr += 25;
                         processed++;
                     } else {
                         if (!is_pcap) msg_ptr = msg_end;

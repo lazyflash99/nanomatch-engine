@@ -1,13 +1,11 @@
 #pragma once
+
 #include <string_view>
 #include <vector>
 #include <charconv>
 
 namespace nanomatch {
 
-/**
- * @brief High-performance, zero-copy CSV parser using string_view.
- */
 class CSVParser {
 public:
     struct Row {
@@ -19,7 +17,7 @@ public:
     };
 
     static bool parse_row(std::string_view line, Row& row) {
-        if (line.empty() || line[0] == 't') return false; // Skip header or empty
+        if (line.empty() || line[0] == 't') return false;
 
         auto split = [](std::string_view s, char delim) {
             std::vector<std::string_view> tokens;

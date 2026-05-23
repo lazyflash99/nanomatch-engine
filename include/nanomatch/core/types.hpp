@@ -4,47 +4,33 @@
 
 namespace nanomatch {
 
-enum class Side : uint8_t {
-    BUY = 0,
-    SELL = 1
-};
+enum class Side : uint8_t { BUY = 0, SELL = 1 };
+enum class OrderType : uint8_t { MARKET = 0, LIMIT = 1 };
 
-enum class OrderType : uint8_t {
-    MARKET = 0,
-    LIMIT = 1
-};
-
-struct PriceLevel; // Forward declaration
+struct PriceLevel;
 
 struct alignas(64) Order {
-    uint64_t order_id;      // 8 bytes
-    int64_t  price;         // 8 bytes
-    uint32_t quantity;      // 4 bytes
-    uint32_t instrument_id; // 4 bytes
-    Side     side;          // 1 byte
-    OrderType type;         // 1 byte
+    uint64_t order_id;
+    int64_t  price;
+    uint32_t quantity;
+    uint32_t instrument_id;
+    Side     side;
+    OrderType type;
 
-    // Linked list pointers for time priority
-    Order* next = nullptr;  // 8 bytes
-    Order* prev = nullptr;  // 8 bytes
-
-    // Pointer to the level for O(1) removal
-    PriceLevel* level = nullptr; // 8 bytes
-
-    uint8_t padding[14];    // Explicit padding to 64 bytes
+    Order* next = nullptr;
+    Order* prev = nullptr;
+    PriceLevel* level = nullptr;
+    
+    uint8_t padding[14];
 };
 
-/**
- * @brief Trade Report for execution notifications.
- * Total size: 32 bytes.
- */
 struct alignas(64) TradeReport {
-    uint64_t trade_id;      // 8 bytes
-    uint64_t maker_id;      // 8 bytes
-    uint64_t taker_id;      // 8 bytes
-    int64_t  price;         // 8 bytes
-    uint32_t quantity;      // 4 bytes
-    uint32_t instrument_id; // 4 bytes
+    uint64_t trade_id;
+    uint64_t maker_id;
+    uint64_t taker_id;
+    int64_t  price;
+    uint32_t quantity;
+    uint32_t instrument_id;
 };
 
 } // namespace nanomatch

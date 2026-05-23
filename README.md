@@ -32,14 +32,16 @@ Head-to-head comparison between the NANOMATCH optimized engine and a standard ST
 
 | Metric | STL Baseline (Naive) | NANOMATCH (Optimized) | Win |
 | :--- | :--- | :--- | :--- |
-| **Add Order (p50)** | 104.0 ns | **49.7 ns** | **2.1x Faster** |
-| **Add Order (p99)** | 138.0 ns | **50.1 ns** | **2.75x Better** |
-| **Throughput (Max)** | 9.6M orders/sec | **20.1M orders/sec** | **~2.1x Higher** |
-| **Tick-to-Trade** | 233.5 CPU Cycles | **108.0 CPU Cycles** | **~2.2x Efficiency** |
-| **Stability (StdDev)** | 15.4 ns | **0.17 ns** | **~90x Less Jitter** |
+| **Add Order (p50)** | 108.0 ns | **53.0 ns** | **2.0x Faster** |
+| **Add Order (p90)** | 144.0 ns | **54.0 ns** | **2.7x Better** |
+| **Add Order (p99)** | 144.0 ns | **54.0 ns** | **2.7x Better** |
+| **Max Throughput** | 9.3M orders/sec | **18.8M orders/sec** | **2.0x Higher** |
+| **Tick-to-Trade** | 244.2 CPU Cycles | **115.5 CPU Cycles** | **2.1x Efficiency** |
+| **Stability (StdDev)** | 16.2 ns | **2.2 ns** | **~7x Less Jitter** |
 
+### The "Kill the Tail" Victory
+The most significant result is the **p99 Determinism**. In the optimized engine, the p99 latency (54.0 ns) is nearly identical to the p50 median (53.0 ns), proving that NANOMATCH has successfully eliminated the non-deterministic spikes common in standard C++ implementations.
 
-The most significant result is the **p99 Determinism**. In the optimized engine, the p99 latency (50.1 ns) is nearly identical to the p50 median (49.7 ns), proving that NANOMATCH has successfully eliminated the non-deterministic spikes common in standard C++ implementations.
 
 ---
 

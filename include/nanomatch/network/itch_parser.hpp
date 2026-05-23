@@ -12,9 +12,6 @@
 
 namespace nanomatch {
 
-/**
- * @brief Zero-copy ITCH-like Binary Parser with Endianness correction.
- */
 class ITCHParser {
 public:
     struct AddOrderMsg {
@@ -25,12 +22,8 @@ public:
         uint32_t instrument_id;
     } __attribute__((packed));
 
-    /**
-     * @brief Parse and convert from Network Order (Big Endian) to Host Order.
-     */
     static void parse_and_fill(const char* buffer, Order& order) {
         const auto* msg = reinterpret_cast<const AddOrderMsg*>(buffer);
-        
         order.order_id = be64toh(msg->order_id);
         order.side = (msg->side == 'B') ? Side::BUY : Side::SELL;
         order.quantity = be32toh(msg->quantity);
@@ -41,10 +34,6 @@ public:
     static uint64_t get_order_id(const char* buffer) {
         const auto* msg = reinterpret_cast<const AddOrderMsg*>(buffer);
         return be64toh(msg->order_id);
-    }
-
-    static Side convert_side(char side_char) {
-        return (side_char == 'B' || side_char == '0') ? Side::BUY : Side::SELL;
     }
 };
 

@@ -35,7 +35,6 @@ struct PriceLevel {
         if (order->next) order->next->prev = order->prev;
         if (order == head) head = order->next;
         if (order == tail) tail = order->prev;
-        
         total_quantity -= order->quantity;
         order->next = order->prev = nullptr;
         order->level = nullptr;
@@ -45,6 +44,8 @@ struct PriceLevel {
 template <typename T, size_t Capacity>
 class OrderMap {
 public:
+    static constexpr uint64_t TOMBSTONE = UINT64_MAX;
+
     struct Entry {
         uint64_t id = 0;
         T* ptr = nullptr;
@@ -52,35 +53,46 @@ public:
 
     void insert(uint64_t id, T* ptr) {
         size_t idx = id % Capacity;
-        size_t start_idx = idx;
+        size_t start = idx;
+        size_t tomb_idx = Capacity;
+
         while (entries_[idx].id != 0 && entries_[idx].id != id) {
+            if (entries_[idx].id == TOMBSTONE && tomb_idx == Capacity) tomb_idx = idx;
             idx = (idx + 1) % Capacity;
-            if (idx == start_idx) return; // Full
+            if (idx == start) break;
         }
-        entries_[idx] = {id, ptr};
+
+        if (entries_[idx].id == id) {
+            entries_[idx].ptr = ptr;
+        } else if (tomb_idx != Capacity) {
+            entries_[tomb_idx] = {id, ptr};
+        } else {
+            entries_[idx] = {id, ptr};
+        }
     }
 
     T* find(uint64_t id) {
         size_t idx = id % Capacity;
-        size_t start_idx = idx;
+        size_t start = idx;
         while (entries_[idx].id != 0) {
             if (entries_[idx].id == id) return entries_[idx].ptr;
             idx = (idx + 1) % Capacity;
-            if (idx == start_idx) break;
+            if (idx == start) break;
         }
         return nullptr;
     }
 
     void erase(uint64_t id) {
         size_t idx = id % Capacity;
-        size_t start_idx = idx;
+        size_t start = idx;
         while (entries_[idx].id != 0) {
             if (entries_[idx].id == id) {
-                entries_[idx] = {0, nullptr};
+                entries_[idx].id = TOMBSTONE;
+                entries_[idx].ptr = nullptr;
                 return;
             }
             idx = (idx + 1) % Capacity;
-            if (idx == start_idx) break;
+            if (idx == start) break;
         }
     }
 
@@ -150,7 +162,7 @@ private:
             Order* maker = level.head;
             while (maker && taker->quantity > 0) {
                 uint32_t match_qty = std::min(taker->quantity, maker->quantity);
-                if (match_qty == 0) break; // Prevent infinite loop
+                if (match_qty == 0) break;
 
                 if (report_queue_) {
                     report_queue_->push(TradeReport{trade_id_++, maker->order_id, taker->order_id, level.price, match_qty, instrument_id_});
