@@ -39,7 +39,6 @@ Head-to-head comparison between the NANOMATCH optimized engine and a standard ST
 | **Tick-to-Trade** | 244.2 CPU Cycles | **115.5 CPU Cycles** | **2.1x Efficiency** |
 | **Stability (StdDev)** | 16.2 ns | **2.2 ns** | **~7x Less Jitter** |
 
-### The "Kill the Tail" Victory
 The most significant result is the **p99 Determinism**. In the optimized engine, the p99 latency (54.0 ns) is nearly identical to the p50 median (53.0 ns), proving that NANOMATCH has successfully eliminated the non-deterministic spikes common in standard C++ implementations.
 
 
