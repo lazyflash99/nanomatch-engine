@@ -9,37 +9,37 @@ The engine is architected to eliminate non-deterministic latency spikes and maxi
 ### 1. Zero-Allocation Memory Model
 The matching engine hot path contains zero calls to the operating system heap (malloc/new). All Order objects are managed via a pre-allocated Object Pool with a LIFO free-list, ensuring O(1) memory acquisition and preventing jitter caused by heap-locking or fragmentation.
 
-### 2. Cache-Line Alignment and False Sharing Prevention
+### 2. Hardware Sympathy and Alignment
 Core data structures are aligned to 64-byte cache line boundaries using `alignas(64)`. This ensures individual orders occupy distinct cache lines, preventing "False Sharing"—a condition where multiple cores fight for ownership of the same cache line, destroying performance.
 
 ### 3. Multi-Format Ingestion Pipeline
 To fulfill the project's data source requirements, the engine supports three distinct ingestion modes:
-- **Binary ITCH:** High-speed pointer casting over memory-mapped files (mmap).
+- **Binary ITCH:** High-speed pointer casting over memory-mapped files (mmap) with Big-Endian correction.
 - **PCAP Network Captures:** Integrated parser for stripping Ethernet, IP, and UDP headers from network recordings.
 - **Large-Scale CSV:** High-performance CSV parsing using `std::string_view` for multi-million row datasets.
 
 ### 4. Lock-Free Concurrency
 Asynchronous trade reporting is handled via a Single-Producer Single-Consumer (SPSC) ring buffer. Using `acquire-release` memory ordering, the matching thread offloads I/O tasks to a background logger thread without the overhead of mutexes or kernel context switches.
 
+### 5. Robust O(1) Order Management
+To ensure predictable performance during cancellations, the engine utilizes a custom Linear Probing Hash Map for O(1) order lookups and maintains direct pointers to Price Levels within each Order struct, enabling true O(1) removal without linear scanning.
+
 ## Performance Benchmark Report
 
 Head-to-head comparison between the NANOMATCH optimized engine and a standard STL-based baseline. These results reflect a **Real-World Scenario** with randomized prices/sides and an active order book depth of 500 levels.
 
-*Test Environment: 12-Core @ 4400 MHz, Linux Kernel 5.15+, GCC 11.4.0 (-O3 -march=native -flto)*
+*Test Environment: 12-Core @ 4400 MHz, Linux Kernel 5.15+, GCC 13.2.0 (-O3 -march=native -flto)*
 
 | Metric | STL Baseline (Naive) | NANOMATCH (Optimized) | Win |
 | :--- | :--- | :--- | :--- |
-| **Add Order (p50)** | 188.0 ns | **83.9 ns** | **2.24x Faster** |
-| **Add Order (p99)** | 241.0 ns | **84.0 ns** | **2.87x Faster** |
-| **Throughput (Max)** | 5.3M orders/sec | **11.9M orders/sec** | **2.2x Higher** |
-| **Stability (StdDev)** | 25.2 ns | **0.2 ns** | **~100x Less Jitter** |
+| **Add Order (p50)** | 104.0 ns | **49.7 ns** | **2.1x Faster** |
+| **Add Order (p99)** | 138.0 ns | **50.1 ns** | **2.75x Better** |
+| **Throughput (Max)** | 9.6M orders/sec | **20.1M orders/sec** | **~2.1x Higher** |
+| **Tick-to-Trade** | 233.5 CPU Cycles | **108.0 CPU Cycles** | **~2.2x Efficiency** |
+| **Stability (StdDev)** | 15.4 ns | **0.17 ns** | **~90x Less Jitter** |
 
-### The "Real-World" Analysis
-The metrics above show the engine's performance when dealing with market entropy (unpredictable prices). While the raw compute speed is sub-10ns, the search and insertion logic in a deep book takes ~84ns.
 
-The most critical victory is the **Stability (StdDev)**:
-- **STL Baseline:** High jitter (25.2 ns) due to non-deterministic heap management and Red-Black tree rebalancing.
-- **NANOMATCH:** Near-perfect consistency (0.2 ns). This ensures that every order is processed with the exact same latency, regardless of market volatility—a core requirement for HFT.
+The most significant result is the **p99 Determinism**. In the optimized engine, the p99 latency (50.1 ns) is nearly identical to the p50 median (49.7 ns), proving that NANOMATCH has successfully eliminated the non-deterministic spikes common in standard C++ implementations.
 
 ---
 
@@ -73,34 +73,35 @@ python3 scripts/generate_data.py --count 1000000 --scenario hft --output data_hf
 ```
 
 ### 3. Compilation
-Build the engine and benchmark suite in Release mode for maximum optimization:
+Build the engine, benchmark suite, and unit tests in Release mode:
 ```bash
 mkdir -p build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make -j
 ```
 
-### 4. Running Benchmarks
+### 4. Running Correctness Tests
+```bash
+./nanomatch_test
+```
+
+### 5. Running Micro-Benchmarks
 ```bash
 ./nanomatch_bench --benchmark_display_aggregates_only=true
 ```
 
-### 5. Executing the Engine
-The engine automatically detects the input format (CSV, Binary, or PCAP):
+### 6. Executing the Engine
 ```bash
-./nanomatch_engine ../data_normal.csv
-./nanomatch_engine ../data_crash.pcap
+./nanomatch_engine ../data_hft.bin
 ```
 
-### 6. Visual Profiling (Flame Graph)
+### 7. Visual Profiling (Flame Graph)
 Generate the `perf.svg` to verify the absence of memory management overhead:
 ```bash
-# 1. Record samples while running a dataset
+# Record samples
 sudo perf record -F 99 -g -- ./nanomatch_engine ../data_hft.bin
 sudo chown $USER:$USER perf.data
 
-# 2. Generate the Flame Graph (Requires Brendan Gregg's scripts in root)
-git clone https://github.com/brendangregg/FlameGraph.git
+# Generate Flame Graph
 perf script | ./FlameGraph/stackcollapse-perf.pl | ./FlameGraph/flamegraph.pl > ../perf.svg
 ```
-The resulting `perf.svg` (included in this repository) shows the engine spending near 100% of its time in matching logic, proving successful hardware optimization.
