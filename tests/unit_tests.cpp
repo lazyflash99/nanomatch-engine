@@ -8,9 +8,6 @@
 
 using namespace nanomatch;
 
-/**
- * @brief Robust Test Macro that works in Release/O3 mode.
- */
 #define MM_EXPECT(condition, msg) \
     if (!(condition)) { \
         std::cerr << "TEST FAILED: " << msg << " at " << __FILE__ << ":" << __LINE__ << "\n"; \
@@ -100,25 +97,19 @@ private:
         MM_EXPECT(t1->quantity == 5, "Taker order should have remainder resting in book");
     }
 
-    /**
-     * @brief VERIFIES TRADE REPORTS (SPSC Concurrent Path)
-     */
     void test_trade_reports_spsc() {
         auto pool = std::make_unique<ObjectPool<Order, 100>>();
         SPSCQueue<TradeReport, 1024> report_queue;
         OrderBook<100, 100> ob(1, pool.get(), &report_queue);
 
-        // 1. Add liquidity
         Order* o1 = pool->acquire(); *o1 = {};
         o1->order_id = 101; o1->price = 500; o1->quantity = 50; o1->side = Side::SELL; o1->type = OrderType::LIMIT;
         ob.add_order(o1);
 
-        // 2. Add taker
         Order* t1 = pool->acquire(); *t1 = {};
         t1->order_id = 202; t1->price = 500; t1->quantity = 20; t1->side = Side::BUY; t1->type = OrderType::LIMIT;
         ob.add_order(t1);
 
-        // 3. Verify SPSC Queue Output
         auto report = report_queue.pop();
         MM_EXPECT(report.has_value(), "SPSC Queue should contain a trade report");
         MM_EXPECT(report->maker_id == 101, "Report maker_id mismatch");
@@ -131,11 +122,9 @@ private:
 int main() {
     EngineTest test;
     test.run_all();
-
     uint64_t start = rdtsc();
     for(int i=0; i<1000; ++i) benchmark::DoNotOptimize(i);
     uint64_t end = rdtsc();
     std::cout << "RDTSC Measurement demo: 1000 loop cycles = " << (end - start) << " cycles.\n";
-
     return 0;
 }

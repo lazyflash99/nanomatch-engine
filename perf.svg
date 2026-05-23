@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" width="1200" height="374" onload="init(evt)" viewBox="0 0 1200 374" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<svg version="1.1" width="1200" height="550" onload="init(evt)" viewBox="0 0 1200 550" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <!-- Flame graph stack visualization. See https://github.com/brendangregg/FlameGraph for latest version, and http://www.brendangregg.com/flamegraphs.html for examples. -->
 <!-- NOTES:  -->
 <defs>
@@ -422,97 +422,197 @@
 	}
 ]]>
 </script>
-<rect x="0.0" y="0" width="1200.0" height="374.0" fill="url(#background)"  />
+<rect x="0.0" y="0" width="1200.0" height="550.0" fill="url(#background)"  />
 <text id="title" x="600.00" y="24" >Flame Graph</text>
-<text id="details" x="10.00" y="357" > </text>
+<text id="details" x="10.00" y="533" > </text>
 <text id="unzoom" x="10.00" y="24" class="hide">Reset Zoom</text>
 <text id="search" x="1090.00" y="24" >Search</text>
 <text id="ignorecase" x="1174.00" y="24" >ic</text>
-<text id="matched" x="1090.00" y="357" > </text>
+<text id="matched" x="1090.00" y="533" > </text>
 <g id="frames">
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="117" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="127.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="101" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="111.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="149" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="159.5" >[[kernel.k..</text>
+<title>_IO_file_xsputn@@GLIBC_2.2.5 (41,424,445 samples, 34.58%)</title><rect x="176.0" y="373" width="408.0" height="15.0" fill="rgb(242,171,41)" rx="2" ry="2" />
+<text  x="179.00" y="383.5" >_IO_file_xsputn@@GLIBC_2.2.5</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="165" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="175.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="133" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="143.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="69" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="79.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (41,424,445 samples, 34.58%)</title><rect x="176.0" y="293" width="408.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="179.00" y="303.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (20,345,717 samples, 30.90%)</title><rect x="10.0" y="229" width="364.6" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="13.00" y="239.5" >[[kernel.kallsyms]]</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="197" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="207.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="197" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="207.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (32,925,693 samples, 27.48%)</title><rect x="584.0" y="373" width="324.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="587.03" y="383.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="213" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="223.5" >[[kernel.k..</text>
+<title>main (61,518,724 samples, 51.35%)</title><rect x="584.0" y="421" width="606.0" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
+<text  x="587.03" y="431.5" >main</text>
 </g>
 <g >
-<title>__libc_start_main@@GLIBC_2.34 (65,849,672 samples, 100.00%)</title><rect x="10.0" y="277" width="1180.0" height="15.0" fill="rgb(229,113,27)" rx="2" ry="2" />
-<text  x="13.00" y="287.5" >__libc_start_main@@GLIBC_2.34</text>
+<title>_IO_file_write@@GLIBC_2.2.5 (41,424,445 samples, 34.58%)</title><rect x="176.0" y="341" width="408.0" height="15.0" fill="rgb(214,43,10)" rx="2" ry="2" />
+<text  x="179.00" y="351.5" >_IO_file_write@@GLIBC_2.2.5</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="181" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="191.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (32,925,693 samples, 27.48%)</title><rect x="584.0" y="357" width="324.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="587.03" y="367.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>__memset_avx2_unaligned_erms (20,345,717 samples, 30.90%)</title><rect x="10.0" y="245" width="364.6" height="15.0" fill="rgb(223,84,20)" rx="2" ry="2" />
-<text  x="13.00" y="255.5" >__memset_avx2_unaligned_erms</text>
+<title>[[kernel.kallsyms]] (5,050,505 samples, 4.22%)</title><rect x="858.6" y="261" width="49.8" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="861.61" y="271.5" >[[ker..</text>
 </g>
 <g >
-<title>nanomatch_engin (65,849,672 samples, 100.00%)</title><rect x="10.0" y="309" width="1180.0" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
-<text  x="13.00" y="319.5" >nanomatch_engin</text>
+<title>[[kernel.kallsyms]] (5,050,505 samples, 4.22%)</title><rect x="858.6" y="277" width="49.8" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="861.61" y="287.5" >[[ker..</text>
 </g>
 <g >
-<title>main (45,503,955 samples, 69.10%)</title><rect x="374.6" y="245" width="815.4" height="15.0" fill="rgb(243,179,42)" rx="2" ry="2" />
-<text  x="377.59" y="255.5" >main</text>
+<title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std::__ostream_insert&lt;char, std::char_traits&lt;char&gt; &gt; (41,424,445 samples, 34.58%)</title><rect x="176.0" y="405" width="408.0" height="15.0" fill="rgb(220,73,17)" rx="2" ry="2" />
+<text  x="179.00" y="415.5" >std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;&amp; std:..</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="53" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="63.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="149" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="159.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="229" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="239.5" >[[kernel.k..</text>
+<title>__libc_start_main@@GLIBC_2.34 (61,518,724 samples, 51.35%)</title><rect x="584.0" y="453" width="606.0" height="15.0" fill="rgb(229,113,27)" rx="2" ry="2" />
+<text  x="587.03" y="463.5" >__libc_start_main@@GLIBC_2.34</text>
 </g>
 <g >
-<title>__libc_start_call_main (65,849,672 samples, 100.00%)</title><rect x="10.0" y="261" width="1180.0" height="15.0" fill="rgb(210,26,6)" rx="2" ry="2" />
-<text  x="13.00" y="271.5" >__libc_start_call_main</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="69" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="79.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>_start (65,849,672 samples, 100.00%)</title><rect x="10.0" y="293" width="1180.0" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
-<text  x="13.00" y="303.5" >_start</text>
+<title>[[kernel.kallsyms]] (32,925,693 samples, 27.48%)</title><rect x="584.0" y="389" width="324.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="587.03" y="399.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="37" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="47.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="213" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="223.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="133" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="143.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (9,417,654 samples, 7.86%)</title><rect x="491.3" y="37" width="92.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="494.27" y="47.5" >[[kernel.ka..</text>
 </g>
 <g >
-<title>all (65,849,672 samples, 100%)</title><rect x="10.0" y="325" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="13.00" y="335.5" ></text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="165" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="175.5" >[[kernel.kallsyms]]</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="85" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="95.5" >[[kernel.k..</text>
+<title>__libc_start_call_main (61,518,724 samples, 51.35%)</title><rect x="584.0" y="437" width="606.0" height="15.0" fill="rgb(210,26,6)" rx="2" ry="2" />
+<text  x="587.03" y="447.5" >__libc_start_call_main</text>
 </g>
 <g >
-<title>[[kernel.kallsyms]] (5,050,505 samples, 7.67%)</title><rect x="1099.5" y="101" width="90.5" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
-<text  x="1102.50" y="111.5" >[[kernel.k..</text>
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="117" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="127.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>nanomatch::OrderBook&lt;1024ul, 200000ul&gt;::add_order (28,593,031 samples, 23.87%)</title><rect x="908.4" y="405" width="281.6" height="15.0" fill="rgb(209,22,5)" rx="2" ry="2" />
+<text  x="911.36" y="415.5" >nanomatch::OrderBook&lt;1024ul, 200000ul..</text>
+</g>
+<g >
+<title>__GI___libc_write (41,424,445 samples, 34.58%)</title><rect x="176.0" y="325" width="408.0" height="15.0" fill="rgb(217,57,13)" rx="2" ry="2" />
+<text  x="179.00" y="335.5" >__GI___libc_write</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (41,424,445 samples, 34.58%)</title><rect x="176.0" y="277" width="408.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="179.00" y="287.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (15,044,265 samples, 12.56%)</title><rect x="760.2" y="309" width="148.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.17" y="319.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (41,424,445 samples, 34.58%)</title><rect x="176.0" y="261" width="408.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="179.00" y="271.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>std::thread::_State_impl&lt;std::thread::_Invoker&lt;std::tuple&lt;main::{lambda (58,276,705 samples, 48.65%)</title><rect x="10.0" y="421" width="574.0" height="15.0" fill="rgb(247,195,46)" rx="2" ry="2" />
+<text  x="13.00" y="431.5" >std::thread::_State_impl&lt;std::thread::_Invoker&lt;std::tuple&lt;main::{lambda</text>
+</g>
+<g >
+<title>_IO_do_write@@GLIBC_2.2.5 (41,424,445 samples, 34.58%)</title><rect x="176.0" y="357" width="408.0" height="15.0" fill="rgb(238,155,37)" rx="2" ry="2" />
+<text  x="179.00" y="367.5" >_IO_do_write@@GLIBC_2.2.5</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (32,925,693 samples, 27.48%)</title><rect x="584.0" y="341" width="324.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="587.03" y="351.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (9,417,654 samples, 7.86%)</title><rect x="491.3" y="53" width="92.7" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="494.27" y="63.5" >[[kernel.ka..</text>
+</g>
+<g >
+<title>_start (61,518,724 samples, 51.35%)</title><rect x="584.0" y="469" width="606.0" height="15.0" fill="rgb(245,185,44)" rx="2" ry="2" />
+<text  x="587.03" y="479.5" >_start</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="181" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="191.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;::~basic_ostream (58,276,705 samples, 48.65%)</title><rect x="10.0" y="453" width="574.0" height="15.0" fill="rgb(205,2,0)" rx="2" ry="2" />
+<text  x="13.00" y="463.5" >std::basic_ostream&lt;char, std::char_traits&lt;char&gt; &gt;::~basic_ostream</text>
+</g>
+<g >
+<title>nanomatch_engin (119,795,429 samples, 100.00%)</title><rect x="10.0" y="485" width="1180.0" height="15.0" fill="rgb(226,97,23)" rx="2" ry="2" />
+<text  x="13.00" y="495.5" >nanomatch_engin</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (5,050,505 samples, 4.22%)</title><rect x="858.6" y="245" width="49.8" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="861.61" y="255.5" >[[ker..</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (41,424,445 samples, 34.58%)</title><rect x="176.0" y="309" width="408.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="179.00" y="319.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (32,925,693 samples, 27.48%)</title><rect x="584.0" y="325" width="324.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="587.03" y="335.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (32,925,693 samples, 27.48%)</title><rect x="584.0" y="405" width="324.4" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="587.03" y="415.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (36,373,940 samples, 30.36%)</title><rect x="225.7" y="85" width="358.3" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="228.74" y="95.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (41,424,445 samples, 34.58%)</title><rect x="176.0" y="229" width="408.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="179.00" y="239.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[unknown] (58,276,705 samples, 48.65%)</title><rect x="10.0" y="469" width="574.0" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="13.00" y="479.5" >[unknown]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (15,044,265 samples, 12.56%)</title><rect x="760.2" y="293" width="148.2" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="763.17" y="303.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>[unknown] (58,276,705 samples, 48.65%)</title><rect x="10.0" y="437" width="574.0" height="15.0" fill="rgb(210,24,5)" rx="2" ry="2" />
+<text  x="13.00" y="447.5" >[unknown]</text>
+</g>
+<g >
+<title>[[kernel.kallsyms]] (41,424,445 samples, 34.58%)</title><rect x="176.0" y="245" width="408.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="179.00" y="255.5" >[[kernel.kallsyms]]</text>
+</g>
+<g >
+<title>all (119,795,429 samples, 100%)</title><rect x="10.0" y="501" width="1180.0" height="15.0" fill="rgb(213,39,9)" rx="2" ry="2" />
+<text  x="13.00" y="511.5" ></text>
+</g>
+<g >
+<title>_IO_fwrite (41,424,445 samples, 34.58%)</title><rect x="176.0" y="389" width="408.0" height="15.0" fill="rgb(210,23,5)" rx="2" ry="2" />
+<text  x="179.00" y="399.5" >_IO_fwrite</text>
 </g>
 </g>
 </svg>

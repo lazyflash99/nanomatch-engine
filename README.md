@@ -23,7 +23,6 @@ Asynchronous trade reporting is handled via a Single-Producer Single-Consumer (S
 
 ### 5. Robust O(1) Order Management
 To ensure predictable performance during cancellations, the engine utilizes a custom Linear Probing Hash Map for O(1) order lookups and maintains direct pointers to Price Levels within each Order struct, enabling true O(1) removal without linear scanning.
-
 ## Performance Benchmark Report
 
 Head-to-head comparison between the NANOMATCH optimized engine and a standard STL-based baseline. These results reflect a **Real-World Scenario** with randomized prices/sides and an active order book depth of 500 levels.
@@ -32,14 +31,14 @@ Head-to-head comparison between the NANOMATCH optimized engine and a standard ST
 
 | Metric | STL Baseline (Naive) | NANOMATCH (Optimized) | Win |
 | :--- | :--- | :--- | :--- |
-| **Add Order (p50)** | 108.0 ns | **53.0 ns** | **2.0x Faster** |
-| **Add Order (p90)** | 144.0 ns | **54.0 ns** | **2.7x Better** |
-| **Add Order (p99)** | 144.0 ns | **54.0 ns** | **2.7x Better** |
-| **Max Throughput** | 9.3M orders/sec | **18.8M orders/sec** | **2.0x Higher** |
-| **Tick-to-Trade** | 244.2 CPU Cycles | **115.5 CPU Cycles** | **2.1x Efficiency** |
-| **Stability (StdDev)** | 16.2 ns | **2.2 ns** | **~7x Less Jitter** |
+| **Add Order (p50)** | 113.0 ns | **51.7 ns** | **2.18x Faster** |
+| **Add Order (p90)** | 156.0 ns | **52.1 ns** | **2.99x Better** |
+| **Add Order (p99)** | 156.0 ns | **52.1 ns** | **2.99x Better** |
+| **Max Throughput** | 8.8M orders/sec | **19.3M orders/sec** | **2.19x Higher** |
+| **Tick-to-Trade** | 256.0 CPU Cycles | **112.4 CPU Cycles** | **2.27x Efficiency** |
+| **Stability (StdDev)** | 19.7 ns | **0.36 ns** | **~54x Less Jitter** |
 
-The most significant result is the **p99 Determinism**. In the optimized engine, the p99 latency (54.0 ns) is nearly identical to the p50 median (53.0 ns), proving that NANOMATCH has successfully eliminated the non-deterministic spikes common in standard C++ implementations.
+The most significant result is the **p99 Determinism**. In the optimized engine, the p99 latency (52.1 ns) is nearly identical to the p50 median (51.7 ns), proving that NANOMATCH has successfully eliminated the non-deterministic spikes common in standard C++ implementations.
 
 
 ---
