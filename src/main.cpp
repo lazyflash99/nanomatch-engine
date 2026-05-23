@@ -23,9 +23,10 @@ int main(int argc, char** argv) {
         const char* ptr = file.data();
         const char* end = ptr + file.size();
 
-        auto order_pool = std::make_unique<ObjectPool<Order, 100000>>();
+        // 100% Consistent Capacities
+        auto order_pool = std::make_unique<ObjectPool<Order, 200000>>();
         auto report_queue = std::make_unique<SPSCQueue<TradeReport, 1024>>();
-        auto ob = std::make_unique<OrderBook<1024, 100000>>(1, report_queue.get());
+        auto ob = std::make_unique<OrderBook<1024, 200000>>(1, order_pool.get(), report_queue.get());
         
         std::atomic<bool> running{true};
 
@@ -42,10 +43,10 @@ int main(int argc, char** argv) {
             }
         });
 
-        bool is_pcap = (*reinterpret_cast<const uint32_t*>(ptr) == 0xa1b2c3d4 || 
-                        *reinterpret_cast<const uint32_t*>(ptr) == 0xd4c3b2a1);
+        bool is_pcap = (file.size() >= 4 && (*reinterpret_cast<const uint32_t*>(ptr) == 0xa1b2c3d4 || 
+                                              *reinterpret_cast<const uint32_t*>(ptr) == 0xd4c3b2a1));
         
-        bool is_csv = (std::string_view(ptr, 4) == "type");
+        bool is_csv = (file.size() > 4 && std::string_view(ptr, 4) == "type");
 
         size_t processed = 0;
 
@@ -58,16 +59,11 @@ int main(int argc, char** argv) {
                 if (CSVParser::parse_row(line, row)) {
                     Order* order = order_pool->acquire();
                     if (order) {
-                        order->order_id = row.order_id;
-                        order->price = row.price;
-                        order->quantity = row.quantity;
-                        order->instrument_id = 1;
-                        order->side = (row.side == 'B') ? Side::BUY : Side::SELL;
-                        order->type = (row.type == 'M') ? OrderType::MARKET : OrderType::LIMIT;
+                        *order = {.order_id = row.order_id, .price = row.price, .quantity = row.quantity, 
+                                  .instrument_id = 1, .side = (row.side == 'B' ? Side::BUY : Side::SELL), 
+                                  .type = (row.type == 'M' ? OrderType::MARKET : OrderType::LIMIT),
+                                  .next = nullptr, .prev = nullptr, .level = nullptr, .padding = {0}};
                         ob->add_order(order);
-                        if (row.type == 'M' || order->quantity == 0) {
-                            order_pool->release(order);
-                        }
                     }
                     processed++;
                 }
@@ -76,13 +72,16 @@ int main(int argc, char** argv) {
         } else {
             if (is_pcap) ptr += PCAPParser::get_global_header_size();
 
-            while (ptr < end) {
+            while (ptr + 26 <= end) {
                 const char* payload = ptr;
                 uint32_t payload_len = 0;
 
                 if (is_pcap) {
                     payload = PCAPParser::get_udp_payload(ptr, payload_len);
-                    if (!payload) break;
+                    if (!payload || payload_len < 26) {
+                        ptr += PCAPParser::get_next_packet_offset(ptr);
+                        continue;
+                    }
                     ptr += PCAPParser::get_next_packet_offset(ptr);
                 } else {
                     payload_len = static_cast<uint32_t>(end - ptr);
@@ -91,31 +90,25 @@ int main(int argc, char** argv) {
                 const char* msg_ptr = payload;
                 const char* msg_end = payload + payload_len;
 
-                while (msg_ptr + 1 <= msg_end) {
+                while (msg_ptr + 26 <= msg_end) {
                     char msg_type = *msg_ptr;
                     msg_ptr++;
 
                     if (msg_type == 'A' || msg_type == 'M' || msg_type == 'X') {
-                        const auto* msg = ITCHParser::parse_add_order(msg_ptr);
                         if (msg_type == 'X') {
-                            Order* canceled = ob->cancel_order(msg->order_id);
-                            if (canceled) order_pool->release(canceled);
+                            uint64_t oid = ITCHParser::get_order_id(msg_ptr);
+                            ob->cancel_order(oid);
                         } else {
                             Order* order = order_pool->acquire();
                             if (order) {
-                                order->order_id = msg->order_id;
-                                order->price = (msg_type == 'M') ? 0 : msg->price;
-                                order->quantity = msg->quantity;
-                                order->instrument_id = msg->instrument_id;
-                                order->side = ITCHParser::convert_side(msg->side);
+                                // Zero-initialize entire struct to satisfy compiler and prevent garbage
+                                *order = {};
+                                ITCHParser::parse_and_fill(msg_ptr, *order);
                                 order->type = (msg_type == 'M') ? OrderType::MARKET : OrderType::LIMIT;
                                 ob->add_order(order);
-                                if (msg_type == 'M' || order->quantity == 0) {
-                                    order_pool->release(order);
-                                }
                             }
                         }
-                        msg_ptr += sizeof(ITCHParser::AddOrderMsg);
+                        msg_ptr += 25; // Advance past payload
                         processed++;
                     } else {
                         if (!is_pcap) msg_ptr = msg_end;

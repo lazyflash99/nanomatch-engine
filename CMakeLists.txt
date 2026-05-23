@@ -20,6 +20,10 @@ include_directories(include)
 # Main Executable
 add_executable(nanomatch_engine src/main.cpp)
 
+# Unit Testing
+add_executable(nanomatch_test tests/unit_tests.cpp)
+target_link_libraries(nanomatch_test benchmark::benchmark) # Just for DoNotOptimize
+
 # Benchmarking
 # Note: Requires google-benchmark installed (e.g., sudo apt install libbenchmark-dev)
 find_package(benchmark REQUIRED)

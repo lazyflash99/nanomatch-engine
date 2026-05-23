@@ -2,18 +2,21 @@
 
 #include "nanomatch/core/types.hpp"
 #include <string_view>
+#if defined(__linux__)
+#include <endian.h>
+#elif defined(__APPLE__)
+#include <libkern/OSByteOrder.h>
+#define be64toh(x) OSSwapBigToHostInt64(x)
+#define be32toh(x) OSSwapBigToHostInt32(x)
+#endif
 
 namespace nanomatch {
 
 /**
- * @brief Zero-copy ITCH-like Binary Parser.
- * Assumes a fixed-width binary format for maximum speed.
+ * @brief Zero-copy ITCH-like Binary Parser with Endianness correction.
  */
 class ITCHParser {
 public:
-    // Example Binary Message Format (Simple Add Order):
-    // [Type:1][OrderID:8][Side:1][Qty:4][Price:8][InstrumentID:4] = 26 bytes
-    
     struct AddOrderMsg {
         uint64_t order_id;
         char side;
@@ -23,16 +26,23 @@ public:
     } __attribute__((packed));
 
     /**
-     * @brief Parse an "Add Order" message from a raw pointer.
-     * Uses zero-copy by casting the pointer directly to the packed struct.
+     * @brief Parse and convert from Network Order (Big Endian) to Host Order.
      */
-    static const AddOrderMsg* parse_add_order(const char* buffer) {
-        return reinterpret_cast<const AddOrderMsg*>(buffer);
+    static void parse_and_fill(const char* buffer, Order& order) {
+        const auto* msg = reinterpret_cast<const AddOrderMsg*>(buffer);
+        
+        order.order_id = be64toh(msg->order_id);
+        order.side = (msg->side == 'B') ? Side::BUY : Side::SELL;
+        order.quantity = be32toh(msg->quantity);
+        order.price = static_cast<int64_t>(be64toh(static_cast<uint64_t>(msg->price)));
+        order.instrument_id = be32toh(msg->instrument_id);
     }
 
-    /**
-     * @brief Utility to convert binary Side to our Side enum.
-     */
+    static uint64_t get_order_id(const char* buffer) {
+        const auto* msg = reinterpret_cast<const AddOrderMsg*>(buffer);
+        return be64toh(msg->order_id);
+    }
+
     static Side convert_side(char side_char) {
         return (side_char == 'B' || side_char == '0') ? Side::BUY : Side::SELL;
     }

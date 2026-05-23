@@ -15,7 +15,7 @@ namespace nanomatch {
  */
 class MappedFile {
 public:
-    MappedFile(const std::string& filename) {
+    MappedFile(const std::string& filename, int advice = MADV_SEQUENTIAL) {
         fd_ = open(filename.c_str(), O_RDONLY);
         if (fd_ == -1) {
             throw std::runtime_error("Could not open file: " + filename);
@@ -34,8 +34,8 @@ public:
             throw std::runtime_error("mmap failed");
         }
 
-        // Hint to the OS that we will read sequentially
-        madvise(data_, size_, MADV_SEQUENTIAL);
+        // Apply OS memory advice
+        madvise(data_, size_, advice);
     }
 
     ~MappedFile() {

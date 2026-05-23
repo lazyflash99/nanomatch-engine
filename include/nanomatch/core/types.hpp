@@ -14,11 +14,8 @@ enum class OrderType : uint8_t {
     LIMIT = 1
 };
 
-/**
- * @brief Packed Order structure.
- * Total size: 32 bytes (fits exactly in half a cache line).
- * Aligned to 64 bytes to prevent false sharing if managed in arrays.
- */
+struct PriceLevel; // Forward declaration
+
 struct alignas(64) Order {
     uint64_t order_id;      // 8 bytes
     int64_t  price;         // 8 bytes
@@ -26,12 +23,15 @@ struct alignas(64) Order {
     uint32_t instrument_id; // 4 bytes
     Side     side;          // 1 byte
     OrderType type;         // 1 byte
-    
-    // Linked list pointers for time priority within a price level
+
+    // Linked list pointers for time priority
     Order* next = nullptr;  // 8 bytes
     Order* prev = nullptr;  // 8 bytes
-    
-    uint8_t padding[22];    // Explicit padding to 64 bytes
+
+    // Pointer to the level for O(1) removal
+    PriceLevel* level = nullptr; // 8 bytes
+
+    uint8_t padding[14];    // Explicit padding to 64 bytes
 };
 
 /**

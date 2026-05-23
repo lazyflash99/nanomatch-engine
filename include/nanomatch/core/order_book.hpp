@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <cstddef>
 
 namespace nanomatch {
 
@@ -16,6 +17,7 @@ struct PriceLevel {
     Order* tail = nullptr;
 
     void add_order(Order* order) {
+        order->level = this;
         if (!head) {
             head = tail = order;
             order->next = order->prev = nullptr;
@@ -36,94 +38,136 @@ struct PriceLevel {
         
         total_quantity -= order->quantity;
         order->next = order->prev = nullptr;
+        order->level = nullptr;
     }
 };
 
-template <size_t MaxLevels = 1024, size_t MaxOrders = 10000>
+template <typename T, size_t Capacity>
+class OrderMap {
+public:
+    struct Entry {
+        uint64_t id = 0;
+        T* ptr = nullptr;
+    };
+
+    void insert(uint64_t id, T* ptr) {
+        size_t idx = id % Capacity;
+        size_t start_idx = idx;
+        while (entries_[idx].id != 0 && entries_[idx].id != id) {
+            idx = (idx + 1) % Capacity;
+            if (idx == start_idx) return; // Full
+        }
+        entries_[idx] = {id, ptr};
+    }
+
+    T* find(uint64_t id) {
+        size_t idx = id % Capacity;
+        size_t start_idx = idx;
+        while (entries_[idx].id != 0) {
+            if (entries_[idx].id == id) return entries_[idx].ptr;
+            idx = (idx + 1) % Capacity;
+            if (idx == start_idx) break;
+        }
+        return nullptr;
+    }
+
+    void erase(uint64_t id) {
+        size_t idx = id % Capacity;
+        size_t start_idx = idx;
+        while (entries_[idx].id != 0) {
+            if (entries_[idx].id == id) {
+                entries_[idx] = {0, nullptr};
+                return;
+            }
+            idx = (idx + 1) % Capacity;
+            if (idx == start_idx) break;
+        }
+    }
+
+private:
+    std::array<Entry, Capacity> entries_{};
+};
+
+template <size_t MaxLevels = 1024, size_t MaxOrders = 200000>
 class OrderBook {
 public:
-    OrderBook(uint32_t instrument_id, SPSCQueue<TradeReport, 1024>* report_queue = nullptr) 
-        : instrument_id_(instrument_id), report_queue_(report_queue) {}
+    OrderBook(uint32_t instrument_id, 
+             ObjectPool<Order, MaxOrders>* pool,
+             SPSCQueue<TradeReport, 1024>* report_queue = nullptr) 
+        : instrument_id_(instrument_id), pool_(pool), report_queue_(report_queue) {}
 
-    /**
-     * @brief Add a new order and attempt matching.
-     */
     void add_order(Order* order) {
         if (order->side == Side::BUY) {
             match(order, ask_levels_, &num_asks_, std::less_equal<int64_t>{});
             if (order->quantity > 0 && order->type == OrderType::LIMIT) {
                 add_to_book(order, bid_levels_, &num_bids_, std::greater<int64_t>{});
-                order_map_[order->order_id % MaxOrders] = order;
+                order_map_.insert(order->order_id, order);
+            } else {
+                pool_->release(order);
             }
         } else {
             match(order, bid_levels_, &num_bids_, std::greater_equal<int64_t>{});
             if (order->quantity > 0 && order->type == OrderType::LIMIT) {
                 add_to_book(order, ask_levels_, &num_asks_, std::less<int64_t>{});
-                order_map_[order->order_id % MaxOrders] = order;
+                order_map_.insert(order->order_id, order);
+            } else {
+                pool_->release(order);
             }
         }
     }
 
-    Order* cancel_order(uint64_t order_id) {
-        Order* order = order_map_[order_id % MaxOrders];
-        if (!order || order->order_id != order_id) return nullptr;
+    void cancel_order(uint64_t order_id) {
+        Order* order = order_map_.find(order_id);
+        if (!order) return;
 
-        auto& levels = (order->side == Side::BUY) ? bid_levels_ : ask_levels_;
-        auto& count = (order->side == Side::BUY) ? num_bids_ : num_asks_;
-
-        for (size_t i = 0; i < count; ++i) {
-            if (levels[i].price == order->price) {
-                levels[i].remove_order(order);
-                if (levels[i].total_quantity == 0) {
-                    std::move(levels.begin() + i + 1, levels.begin() + count, levels.begin() + i);
-                    count--;
+        if (order->level) {
+            PriceLevel* level = order->level;
+            level->remove_order(order);
+            if (level->total_quantity == 0) {
+                auto& levels = (order->side == Side::BUY) ? bid_levels_ : ask_levels_;
+                auto& count = (order->side == Side::BUY) ? num_bids_ : num_asks_;
+                for (size_t i = 0; i < count; ++i) {
+                    if (&levels[i] == level) {
+                        std::move(levels.begin() + i + 1, levels.begin() + count, levels.begin() + i);
+                        count--;
+                        break;
+                    }
                 }
-                break;
             }
         }
-        order_map_[order_id % MaxOrders] = nullptr;
-        return order;
+        order_map_.erase(order_id);
+        pool_->release(order);
     }
 
 private:
     template <typename Comparator>
-    void match(Order* taker_order, std::array<PriceLevel, MaxLevels>& levels, size_t* num_levels, Comparator can_match) {
+    void match(Order* taker, std::array<PriceLevel, MaxLevels>& levels, size_t* num_levels, Comparator can_match) {
         size_t level_idx = 0;
-        while (taker_order->quantity > 0 && level_idx < *num_levels) {
+        while (taker->quantity > 0 && level_idx < *num_levels) {
             auto& level = levels[level_idx];
-            
-            if (taker_order->type == OrderType::LIMIT && !can_match(taker_order->price, level.price)) {
-                break;
-            }
+            if (taker->type == OrderType::LIMIT && !can_match(taker->price, level.price)) break;
 
-            Order* maker_order = level.head;
-            while (maker_order && taker_order->quantity > 0) {
-                uint32_t match_qty = std::min(taker_order->quantity, maker_order->quantity);
-                
+            Order* maker = level.head;
+            while (maker && taker->quantity > 0) {
+                uint32_t match_qty = std::min(taker->quantity, maker->quantity);
+                if (match_qty == 0) break; // Prevent infinite loop
+
                 if (report_queue_) {
-                    TradeReport report{
-                        .trade_id = trade_id_counter_++,
-                        .maker_id = maker_order->order_id,
-                        .taker_id = taker_order->order_id,
-                        .price = level.price,
-                        .quantity = match_qty,
-                        .instrument_id = instrument_id_
-                    };
-                    report_queue_->push(report);
+                    report_queue_->push(TradeReport{trade_id_++, maker->order_id, taker->order_id, level.price, match_qty, instrument_id_});
                 }
                 
-                taker_order->quantity -= match_qty;
-                maker_order->quantity -= match_qty;
+                taker->quantity -= match_qty;
+                maker->quantity -= match_qty;
                 level.total_quantity -= match_qty;
 
-                if (maker_order->quantity == 0) {
-                    Order* to_release = maker_order;
+                if (maker->quantity == 0) {
+                    Order* to_release = maker;
                     level.remove_order(to_release);
-                    order_map_[to_release->order_id % MaxOrders] = nullptr;
-                    // Caller must release back to pool
-                    maker_order = level.head;
+                    order_map_.erase(to_release->order_id);
+                    maker = level.head;
+                    pool_->release(to_release);
                 } else {
-                    maker_order = maker_order->next;
+                    maker = maker->next;
                 }
             }
 
@@ -153,13 +197,13 @@ private:
     }
 
     uint32_t instrument_id_;
+    ObjectPool<Order, MaxOrders>* pool_;
     std::array<PriceLevel, MaxLevels> bid_levels_;
     std::array<PriceLevel, MaxLevels> ask_levels_;
     size_t num_bids_ = 0;
     size_t num_asks_ = 0;
-    uint64_t trade_id_counter_ = 0;
-
-    std::array<Order*, MaxOrders> order_map_{}; 
+    uint64_t trade_id_ = 1;
+    OrderMap<Order, MaxOrders * 2> order_map_; 
     SPSCQueue<TradeReport, 1024>* report_queue_;
 };
 
